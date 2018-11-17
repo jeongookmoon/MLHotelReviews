@@ -42,6 +42,6 @@ def reviewscore(request):
     for i in range(0, len(negativeResult)):
         negativeScore = negativeScore + negativeResult[i][1]
     
-    totalScore = positiveScore + negativeScore
+    totalScore = positiveScore - negativeScore
 
     return HttpResponse(totalScore)
