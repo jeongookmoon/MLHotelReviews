@@ -49,7 +49,12 @@ def reviewscore(request):
     totalScore = positiveScore - negativeScore
 
     expectedReviewScore = 0.40609431*totalScore + 8.31906161
-    expectedReviewScore = round(expectedReviewScore,2)
+    if expectedReviewScore > 10.0:
+        expectedReviewScore = 10.0
+    elif expectedReviewScore < 0.0:
+        expectedReviewScore = 0.0
+    else:
+        expectedReviewScore = round(expectedReviewScore,2)
 
     reviewsRawData = pd.read_csv("../data/Hotel_Reviews.csv", usecols=['Positive_Review', 'Negative_Review', 'Reviewer_Score'])
     resultTuple = reviewsRawData[reviewsRawData["Positive_Review"].str.contains(positive)]
