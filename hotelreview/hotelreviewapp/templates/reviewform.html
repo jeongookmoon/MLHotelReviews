@@ -1,12 +1,12 @@
-# hotelreview\hotelreviewapp\reviewform.html
-
 <html>
 <head>
     <title>Review</title>
 </head>
 <body>
-    <form action="/reviewscore/" method="get">
+    <form action="/reviewscore/" method="post"> {% csrf_token %}
+        Positive:
         <input type="text" name="positive">
+        Negative:
         <input type="text" name="negative">
         <input type="submit" value="reviewscore">
     </form>
