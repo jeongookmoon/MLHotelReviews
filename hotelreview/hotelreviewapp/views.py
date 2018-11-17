@@ -5,19 +5,16 @@ from multi_rake import Rake
 from django.http import HttpResponse
 
 import pandas as pd
-reviewsRawData = pd.read_csv("../../data/Hotel_Reviews.csv", usecols=['Positive_Review', 'Negative_Review', 'Reviewer_Score'])
+import copy
+
 
 class HomeView(TemplateView):
     template_name = 'reviewform.html'
 
-#resultTuple = reviewsRawData[reviewsRawData["Positive_Review"].str.contains('Good restaurant with modern design great chill out place Great park nearby the hotel and awesome main stairs')]
-#print(resultTuple["Reviewer_Score"])
 
-
-# def index(request):
+#def index(request):
 #     rake = Rake()
 #     temp = rake.apply('No real complaints the hotel was great great location surroundings rooms amenities and service Two recommendations however firstly the staff upon check in are very confusing regarding deposit payment')
-
 #     return HttpResponse(temp)
 
 # def reviewform(request):
@@ -41,16 +38,38 @@ def reviewscore(request):
     positiveScore = 0
     negativeScore = 0
 
-    for i in range(0, len(positiveResult)) :
-        positiveScore = positiveScore + positiveResult[i][1]
+    if len(positiveResult) > 0:
+        for i in range(0, len(positiveResult)) :
+            positiveScore = positiveScore + positiveResult[i][1]
     
-    for i in range(0, len(negativeResult)):
-        negativeScore = negativeScore + negativeResult[i][1]
+    if len(negativeResult) > 0:
+        for i in range(0, len(negativeResult)):
+            negativeScore = negativeScore + negativeResult[i][1]
     
     totalScore = positiveScore - negativeScore
 
     expectedReviewScore = 0.40609431*totalScore + 8.31906161
     expectedReviewScore = round(expectedReviewScore,2)
 
-    result = 0
-    return HttpResponse(expectedReviewScore)
+    reviewsRawData = pd.read_csv("../data/Hotel_Reviews.csv", usecols=['Positive_Review', 'Negative_Review', 'Reviewer_Score'])
+    resultTuple = reviewsRawData[reviewsRawData["Positive_Review"].str.contains(positive)]
+    
+    resultVal = ''
+    actual = ' | This review is not from database'
+    analysis = ''
+    if len(resultTuple["Reviewer_Score"].values) > 0:
+        resultVal = resultTuple["Reviewer_Score"].values
+        if resultVal[0] > 0.0:
+            tempVal = copy.deepcopy(resultVal[0])
+            actual = ' | Actual '
+            actual = actual + copy.deepcopy(str(resultVal[0]))
+            actual = actual + ' | Accuracy: '
+            if expectedReviewScore > resultVal[0]:
+                analysis = (expectedReviewScore-resultVal[0])
+            else:
+                analysis = (resultVal[0]-expectedReviewScore)
+            analysis = str(round(100-(analysis/tempVal*100),2))
+            analysis = analysis + '%'
+
+    result = "User Rating: Expected " + str(expectedReviewScore) + actual + analysis
+    return HttpResponse(result)
