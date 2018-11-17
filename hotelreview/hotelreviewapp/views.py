@@ -49,6 +49,8 @@ def reviewscore(request):
     totalScore = positiveScore - negativeScore
 
     expectedReviewScore = 0.40609431*totalScore + 8.31906161
+    
+    # limit expected score range from 0 to 10
     if expectedReviewScore > 10.0:
         expectedReviewScore = 10.0
     elif expectedReviewScore < 0.0:
@@ -56,12 +58,15 @@ def reviewscore(request):
     else:
         expectedReviewScore = round(expectedReviewScore,2)
 
+    # import actual data for actual user score
     reviewsRawData = pd.read_csv("../data/Hotel_Reviews.csv", usecols=['Positive_Review', 'Negative_Review', 'Reviewer_Score'])
     resultTuple = reviewsRawData[reviewsRawData["Positive_Review"].str.contains(positive)]
     
     resultVal = ''
     actual = ' | This review is not from database'
     analysis = ''
+
+    # handle if the review doesn't exist on database
     if len(resultTuple["Reviewer_Score"].values) > 0:
         resultVal = resultTuple["Reviewer_Score"].values
         if resultVal[0] > 0.0:
