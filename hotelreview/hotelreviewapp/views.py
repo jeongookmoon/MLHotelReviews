@@ -19,11 +19,19 @@ def index(request):
 #     template = loader.get_template("hotelreview/reviewform.html")
 #     return HttpResponse(template.render())
 
-# def reviewscore(request):
-#     if 'positive' in request.GET:
-#         message = 'You searched for: %r' % request.GET['positive']
-#     if 'negative' in request.GET:
-#         message = 'You searched for: %r' % request.GET['negative']
-#     else:
-#         message = 'You submitted an empty form.'
-#     return HttpResponse(message)
+def reviewscore(request):
+    rake = Rake()
+    positive = request.POST['positive']
+    negative = request.POST['negative']
+
+    if len(positive) == 0 :
+        positive =  "No positive"
+    if len(negative) == 0:
+        #message = 'You searched for: %r' % request.GET['negative']
+        negative = "No negative"
+    
+    positiveResult = rake.apply(positive)
+    negativeResult = rake.apply(negative)
+
+    message = positiveResult
+    return HttpResponse(negativeResult)

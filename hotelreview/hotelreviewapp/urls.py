@@ -7,7 +7,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view()), # Map the HomeView to the index route
     path('index/', views.index, name='index'),
-    # path('', views.reviewform, name='reviewform'),
-    # path('', views.reviewscore, name='reviewscore'),
-    # path('', HomeView.as_view()),
+    path('reviewscore/', views.reviewscore, name='reviewscore'),
 ]
