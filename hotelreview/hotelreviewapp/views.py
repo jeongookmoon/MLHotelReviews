@@ -48,7 +48,7 @@ def reviewscore(request):
     
     totalScore = positiveScore - negativeScore
 
-    expectedReviewScore = 0.40609431*totalScore + 8.31906161
+    expectedReviewScore = 0.38051774*totalScore + 8.34330431
     
     # limit expected score range from 0 to 10
     if expectedReviewScore > 10.0:
