@@ -33,5 +33,15 @@ def reviewscore(request):
     positiveResult = rake.apply(positive)
     negativeResult = rake.apply(negative)
 
-    message = positiveResult
-    return HttpResponse(negativeResult)
+    positiveScore = 0
+    negativeScore = 0
+
+    for i in range(0, len(positiveResult)) :
+        positiveScore = positiveScore + positiveResult[i][1]
+    
+    for i in range(0, len(negativeResult)):
+        negativeScore = negativeScore + negativeResult[i][1]
+    
+    totalScore = positiveScore + negativeScore
+
+    return HttpResponse(totalScore)
