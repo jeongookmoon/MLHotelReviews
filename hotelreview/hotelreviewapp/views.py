@@ -76,9 +76,10 @@ def reviewscore(request):
             actual = actual + ' | Accuracy: '
             if expectedReviewScore > resultVal[0]:
                 analysis = (expectedReviewScore-resultVal[0])
+                analysis = str(round(100-(analysis/expectedReviewScore*100),2))
             else:
                 analysis = (resultVal[0]-expectedReviewScore)
-            analysis = str(round(100-(analysis/tempVal*100),2))
+                analysis = str(round(100-(analysis/tempVal*100),2))
             analysis = analysis + '%'
 
     result = "User Rating: Expected " + str(expectedReviewScore) + actual + analysis
