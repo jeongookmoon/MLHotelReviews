@@ -82,5 +82,5 @@ def reviewscore(request):
                 analysis = str(round(100-(analysis/tempVal*100),2))
             analysis = analysis + '%'
 
-    result = "User Rating: Expected " + str(expectedReviewScore) + actual + analysis
+    result = "User Rating: Predicted " + str(expectedReviewScore) + actual + analysis
     return HttpResponse(result)
