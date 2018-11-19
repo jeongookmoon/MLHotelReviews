@@ -7,9 +7,18 @@ from django.http import HttpResponse
 import pandas as pd
 import copy
 
+import numpy as np
+from textblob import TextBlob
+from collections import Counter
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 class HomeView(TemplateView):
     template_name = 'reviewform.html'
+    
+
+class HotelView(TemplateView):
+    template_name = 'similarhotel.html'
 
 
 #def index(request):
@@ -83,4 +92,90 @@ def reviewscore(request):
             analysis = analysis + '%'
 
     result = "User Rating: Predicted " + str(expectedReviewScore) + actual + analysis
+    return HttpResponse(result)
+
+
+def similarhotel(request):
+    hotelname = request.POST['hotelname']
+    
+    # read in file
+    train = pd.read_csv("./Hotel_Reviews.csv",usecols=['Hotel_Name','Positive_Review','Average_Score'])
+    train = train.iloc[0:5000,]
+
+    # group dataset by hotel name
+    grouped_df = train.groupby('Hotel_Name')
+    grouped_df_sum = train.groupby('Hotel_Name').apply(lambda x: x.sum())
+
+    # create hashmap by having comment keyword attributes as the keys
+    keywordArray = {}
+    attributes = {}
+    attributes['staff'] = 0
+    attributes['room'] = 1
+    attributes['location'] = 2
+    attributes['breakfast'] = 3
+    attributes['bed']=4
+    attributes['service']=5
+    attributes['station'] = 6
+    attributes['bathroom'] = 7
+    attributes['area'] = 8
+    attributes['bar'] = 9
+    attributes['view']= 10
+    attributes['metro'] = 11
+    attributes['tube'] = 12
+    attributes['food'] = 13
+
+    # assign each key with average revew score arrays
+    rowSize = []
+    for k in grouped_df.size():
+        rowSize.append(k)
+
+    scores = []
+    i = 0
+    for k in grouped_df_sum['Average_Score']:
+        score = int(round(k/rowSize[i],0))
+        scores.append(score)
+        i = i + 1
+
+    j = 0
+    keyArr = grouped_df.groups.keys()
+    for k in keyArr :
+        keywordArray[k] = copy.deepcopy([scores[j], scores[j], scores[j], scores[j], scores[j], scores[j], scores[j], scores[j], scores[j], scores[j], scores[j],scores[j], scores[j], scores[j]])
+        j = j + 1
+
+    # analize each review and find the most common keywords
+    reviewTags = []
+    for i in range(0, len(grouped_df_sum)) :
+        eachReview = TextBlob(grouped_df_sum['Positive_Review'][i])
+        reviewTags.append([])
+        for j in range(0, len(eachReview.tags)) :
+            if eachReview.tags[j][1] == 'NN' :
+                reviewTags[i].append(eachReview.tags[j][0])
+
+    # add the frequency of each keyword to the hotel's score array
+    hotelnames = []
+    for k in keywordArray.keys() :
+        hotelnames.append(k)
+
+    for i in range(0,len(reviewTags)):
+        counter = Counter(reviewTags[i])
+        mostOccurTag = counter.most_common(10) 
+        for j in range (0,len(mostOccurTag)-1):
+            tempNum2 = str(mostOccurTag[j][1])
+            tempNum3 = str(attributes.get(mostOccurTag[j][0]))
+            for k in range(0, len(mostOccurTag)):
+                if mostOccurTag[j][0] in attributes :
+                    keywordArray[hotelnames[i]][int(tempNum3)] = int(tempNum2)
+
+    simScores = []
+    for k in keywordArray.keys():
+        if k != hotelname:
+            simScores.append(cosine_similarity([keywordArray.get(hotelname)], [keywordArray.get(k)])[0][0])
+    npsimScores = np.array(simScores)
+    indexes = npsimScores.argsort()[-3:][::-1]
+    nphotelnames = np.array(hotelnames)
+
+    result = []
+    for k in nphotelnames[indexes]:
+        result.append(k)
+        result.append("          ")
     return HttpResponse(result)
