@@ -1,0 +1,12 @@
+<html>
+<head>
+    <title>Hotel</title>
+</head>
+<body>
+    <form action="/similarhotel/" method="post"> {% csrf_token %}
+        hotelname:
+        <input type="text" name="hotelname">
+        <input type="submit" value="similarhotel">
+    </form>
+</body>
+</html>
